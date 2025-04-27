@@ -11,68 +11,64 @@ const routes = require("./routes/index");
 require("dotenv").config();
 
 const app = express();
-// Connect to MongoDB
+
+// MongoDB Connection Setup
 connectDB()
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Security middleware
+// Security Middleware
 app.use(helmet());
 app.use(
   cors({
-    // Specify your client's origin instead of wildcard
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    // Allow credentials (cookies, authorization headers)
-    credentials: true,
-    // Allow these methods
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    // Allow these headers
-    allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],
+    origin: process.env.CLIENT_URL || "http://localhost:5173", // Use environment variable for client URL
+    credentials: true, // Allow cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allow necessary methods
+    allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"], // Allow required headers
   })
 );
-app.use(sanitizeMongo);
-app.use(sanitizeInput);
+app.use(sanitizeMongo); // MongoDB sanitation
+app.use(sanitizeInput); // Input sanitation
 app.use(cookieParser());
-app.use(express.json({ limit: "10kb" })); // Limit payload size
+app.use(express.json({ limit: "10kb" })); // Limit payload size to avoid overload
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration
+// Session Configuration with MongoDB Store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET, // Secret key from .env
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI,
-      ttl: 24 * 60 * 60, // 24 hours
+      mongoUrl: process.env.MONGO_URI, // Mongo URI from .env
+      ttl: 24 * 60 * 60, // 24 hours session expiration
     }),
     cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      sameSite: "strict",
-      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      secure: process.env.NODE_ENV === "production", // Secure cookies in production
+      httpOnly: true, // Prevent JS access to cookies
+      sameSite: "strict", // Prevent CSRF attacks
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours cookie expiration
     },
   })
 );
 
-// Apply rate limiting to auth routes
+// Rate Limiting for Authentication Routes
 app.use("/api/auth", authLimiter);
 
-// Use routes from the central router
+// Central Router for API Routes
 app.use("/api", routes);
 
-// Global error handler
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     error:
-      process.env.NODE_ENV === "production"
-        ? "Internal server error"
-        : err.message,
+      process.env.NODE_ENV === "production" ? "Internal server error" : err.message,
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Server Setup
+const PORT = process.env.PORT || 5000; // Default port or environment port
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
