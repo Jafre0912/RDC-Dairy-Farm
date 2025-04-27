@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-popup {
+  animation: popup 0.2s ease-out forwards;
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f1f1f1;
+}
+
+/* Fix for Leaflet map z-index issues */
+.leaflet-pane {
+  z-index: 1;
+}
+
+.leaflet-control {
+  z-index: 10 !important;
+}
+
+.leaflet-tooltip,
+.leaflet-popup {
+  z-index: 20 !important;
+}
