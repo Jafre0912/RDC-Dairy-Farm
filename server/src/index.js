@@ -8,7 +8,7 @@ const connectDB = require("./config/db");
 const { authLimiter } = require("./security/rateLimit");
 const { sanitizeInput, sanitizeMongo } = require("./security/sanitize");
 const routes = require("./routes/index");
-require("dotenv").config();
+require("dotenv").config(); // Make sure dotenv is loaded
 
 const app = express();
 
@@ -21,7 +21,7 @@ connectDB()
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173", // Use environment variable for client URL
+    origin: process.env.CLIENT_URL || "http://localhost:5173", // Client URL from environment
     credentials: true, // Allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Allow necessary methods
     allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"], // Allow required headers
@@ -36,11 +36,11 @@ app.use(express.urlencoded({ extended: true }));
 // Session Configuration with MongoDB Store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Secret key from .env
+    secret: process.env.SESSION_SECRET, // Ensure you have a session secret in .env
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI, // Mongo URI from .env
+      mongoUrl: process.env.MONGO_URI, // Use Mongo URI from .env
       ttl: 24 * 60 * 60, // 24 hours session expiration
     }),
     cookie: {
